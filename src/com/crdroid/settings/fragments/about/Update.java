@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 crDroid Android Project
+ * Copyright (C) 2016-2018 crDroid Android Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,28 +26,30 @@ import android.support.v7.preference.PreferenceCategory;
 import com.android.internal.logging.nano.MetricsProto;
 
 import com.crdroid.settings.R;
-import com.crdroid.settings.fragments.about.ota.configs.AppConfig;
-import com.crdroid.settings.fragments.about.ota.configs.LinkConfig;
-import com.crdroid.settings.fragments.about.ota.configs.OTAVersion;
-import com.crdroid.settings.fragments.about.ota.dialogs.WaitDialogFragment;
-import com.crdroid.settings.fragments.about.ota.tasks.CheckUpdateTask;
-import com.crdroid.settings.fragments.about.ota.utils.OTAUtils;
-import com.crdroid.settings.fragments.about.ota.xml.OTALink;
+import com.crdroid.settings.fragments.about.update.configs.AppConfig;
+import com.crdroid.settings.fragments.about.update.configs.LinkConfig;
+import com.crdroid.settings.fragments.about.update.configs.OTAVersion;
+import com.crdroid.settings.fragments.about.update.dialogs.WaitDialogFragment;
+import com.crdroid.settings.fragments.about.update.tasks.CheckUpdateTask;
+import com.crdroid.settings.fragments.about.update.utils.OTAUtils;
+import com.crdroid.settings.fragments.about.update.xml.OTALink;
 import com.android.settings.SettingsPreferenceFragment;
 
 import java.util.List;
 
-public class OTA extends SettingsPreferenceFragment implements
+public class Update extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener,
         WaitDialogFragment.OTADialogListener,
         LinkConfig.LinkConfigListener {
 
     private static final String KEY_ROM_INFO = "key_rom_info";
+    private static final String KEY_MAINTAINER_INFO = "key_maintainer_info";
     private static final String KEY_CHECK_UPDATE = "key_check_update";
     private static final String KEY_UPDATE_INTERVAL = "key_update_interval";
     private static final String CATEGORY_LINKS = "category_links";
 
     private static PreferenceScreen mRomInfo;
+    private static PreferenceScreen mMaintainerInfo;
     private static PreferenceScreen mCheckUpdate;
     private static ListPreference mUpdateInterval;
     private static PreferenceCategory mLinksCategory;
@@ -64,6 +66,7 @@ public class OTA extends SettingsPreferenceFragment implements
         Context context = getActivity();
 
         mRomInfo = (PreferenceScreen) getPreferenceScreen().findPreference(KEY_ROM_INFO);
+        mMaintainerInfo = (PreferenceScreen) getPreferenceScreen().findPreference(KEY_MAINTAINER_INFO);
         mCheckUpdate = (PreferenceScreen) getPreferenceScreen().findPreference(KEY_CHECK_UPDATE);
 
         mUpdateInterval = (ListPreference) getPreferenceScreen().findPreference(KEY_UPDATE_INTERVAL);
@@ -77,6 +80,7 @@ public class OTA extends SettingsPreferenceFragment implements
 
     public static void updatePreferences(Context context) {
         updateRomInfo(context);
+        updateMaintainerInfo(context);
         updateLastCheckSummary(context);
         updateIntervalSummary(context);
     }
@@ -131,6 +135,17 @@ public class OTA extends SettingsPreferenceFragment implements
                 mRomInfo.setSummary(String.format(prefix, fullLatestVersion));
             }
         }
+    }
+
+    private static void updateMaintainerInfo(Context context) {
+        if (mMaintainerInfo == null)
+            return;
+
+        String maintainer = AppConfig.getMaintainer(context);
+        if (maintainer == null || maintainer.isEmpty()) {
+            maintainer = context.getResources().getString(R.string.maintainer_unknown);
+        }
+        mMaintainerInfo.setSummary(maintainer);
     }
 
     private static void updateLastCheckSummary(Context context) {
